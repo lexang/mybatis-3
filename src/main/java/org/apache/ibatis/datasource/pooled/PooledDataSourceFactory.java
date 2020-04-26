@@ -19,6 +19,9 @@ import org.apache.ibatis.datasource.unpooled.UnpooledDataSourceFactory;
 
 /**
  * @author Clinton Begin
+ * PooledDataSourceFactory 主要用来创建 PooledDataSource 对象，它继承了 UnpooledDataSource 类，
+ * 设置 DataSource 参数的方法复用UnpooledDataSource 中的 setProperties 方法，
+ * 只是数据源返回的是  PooledDataSource 对象而已
  */
 public class PooledDataSourceFactory extends UnpooledDataSourceFactory {
 

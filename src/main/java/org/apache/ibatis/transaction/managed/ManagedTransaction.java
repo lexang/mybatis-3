@@ -31,7 +31,8 @@ import org.apache.ibatis.transaction.Transaction;
  * By default, it closes the connection but can be configured not to do it.
  *
  * @author Clinton Begin
- *
+ *  通过容器来进行事务管理，而是让程序的容器（JBOSS,WebLogic）来实现对事务的管理
+ *  所有它对事务提交和回滚并不会做任何操作
  * @see ManagedTransactionFactory
  */
 public class ManagedTransaction implements Transaction {
@@ -62,11 +63,13 @@ public class ManagedTransaction implements Transaction {
     return this.connection;
   }
 
+  //提交操作无效
   @Override
   public void commit() throws SQLException {
     // Does nothing
   }
 
+  //回滚操作无效
   @Override
   public void rollback() throws SQLException {
     // Does nothing

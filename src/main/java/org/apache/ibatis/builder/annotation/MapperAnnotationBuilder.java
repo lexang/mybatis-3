@@ -94,6 +94,7 @@ import org.apache.ibatis.type.UnknownTypeHandler;
 /**
  * @author Clinton Begin
  * @author Kazuki Shimizu
+ * *mapper.java 解析
  */
 public class MapperAnnotationBuilder {
 
@@ -105,6 +106,7 @@ public class MapperAnnotationBuilder {
   private final Class<?> type;
 
   static {
+    // 添加注解类型
     SQL_ANNOTATION_TYPES.add(Select.class);
     SQL_ANNOTATION_TYPES.add(Insert.class);
     SQL_ANNOTATION_TYPES.add(Update.class);
@@ -118,6 +120,7 @@ public class MapperAnnotationBuilder {
 
   public MapperAnnotationBuilder(Configuration configuration, Class<?> type) {
     String resource = type.getName().replace('.', '/') + ".java (best guess)";
+    // 处理缓存
     this.assistant = new MapperBuilderAssistant(configuration, resource);
     this.configuration = configuration;
     this.type = type;
@@ -125,17 +128,24 @@ public class MapperAnnotationBuilder {
 
   public void parse() {
     String resource = type.toString();
+    // 判断是否已经加载过资源
     if (!configuration.isResourceLoaded(resource)) {
+      // 先加载xml资源
       loadXmlResource();
+      // 添加解析过的映射，下次判断有就不在解析
       configuration.addLoadedResource(resource);
+      // 命名空间
       assistant.setCurrentNamespace(type.getName());
+      // 二级缓存的处理
       parseCache();
       parseCacheRef();
+      // 方法
       Method[] methods = type.getMethods();
       for (Method method : methods) {
         try {
           // issue #237
           if (!method.isBridge()) {
+            // 解析方法
             parseStatement(method);
           }
         } catch (IncompleteElementException e) {
@@ -227,11 +237,18 @@ public class MapperAnnotationBuilder {
   }
 
   private String parseResultMap(Method method) {
+    //@ConstructorArgs、@Results、@TypeDiscriminator都是对返回结果映射的设置
+    // 判断方法返回类型
     Class<?> returnType = getReturnType(method);
+    // 判断@ConstructorArgs
     ConstructorArgs args = method.getAnnotation(ConstructorArgs.class);
+    // 判断@Results
     Results results = method.getAnnotation(Results.class);
+    // 判断@TypeDiscriminator
     TypeDiscriminator typeDiscriminator = method.getAnnotation(TypeDiscriminator.class);
+    // 获取resultMapId
     String resultMapId = generateResultMapName(method);
+    // 设置
     applyResultMap(resultMapId, returnType, argsIf(args), resultsIf(results), typeDiscriminator);
     return resultMapId;
   }
@@ -297,10 +314,14 @@ public class MapperAnnotationBuilder {
   }
 
   void parseStatement(Method method) {
+    //获取方法入参类型
     Class<?> parameterTypeClass = getParameterType(method);
+    //获取自定义SQL的解析方式 使用该接口自定义SQL的解析方式 @Select等注解动态组合SQL语句  #https://blog.csdn.net/apicescn/article/details/79507610
     LanguageDriver languageDriver = getLanguageDriver(method);
+    //获取注解上sql对象
     SqlSource sqlSource = getSqlSourceFromAnnotations(method, parameterTypeClass, languageDriver);
     if (sqlSource != null) {
+      //获取@Options注解 MyBatis的@Options注解能够设置查询结果缓存时间，能够在插入数据时获得对象生成自增的主键值 https://blog.csdn.net/sinat_32023305/article/details/80253107
       Options options = method.getAnnotation(Options.class);
       final String mappedStatementId = type.getName() + "." + method.getName();
       Integer fetchSize = null;
@@ -317,44 +338,59 @@ public class MapperAnnotationBuilder {
       String keyColumn = null;
       if (SqlCommandType.INSERT.equals(sqlCommandType) || SqlCommandType.UPDATE.equals(sqlCommandType)) {
         // first check for SelectKey annotation - that overrides everything else
+        // 获取@SelectKey注解
         SelectKey selectKey = method.getAnnotation(SelectKey.class);
         if (selectKey != null) {
+          // 优先获取@SelectKey的设置
           keyGenerator = handleSelectKeyAnnotation(selectKey, mappedStatementId, getParameterType(method), languageDriver);
           keyProperty = selectKey.keyProperty();
         } else if (options == null) {
+          // 如果没有@Options的设置，则获取Configuration的配置 判断是否存在@Options注解，是否设置useGeneratedKeys属性为true，是的话采用Jdbc3KeyGenerator自增
           keyGenerator = configuration.isUseGeneratedKeys() ? Jdbc3KeyGenerator.INSTANCE : NoKeyGenerator.INSTANCE;
         } else {
+          //最后判断Configuration是否设置useGeneratedKeys为true，是的话采用Jdbc3KeyGenerator自增
           keyGenerator = options.useGeneratedKeys() ? Jdbc3KeyGenerator.INSTANCE : NoKeyGenerator.INSTANCE;
           keyProperty = options.keyProperty();
           keyColumn = options.keyColumn();
         }
       } else {
+        // 默认不自增长
         keyGenerator = NoKeyGenerator.INSTANCE;
       }
 
       if (options != null) {
+        // 是否刷新缓存
         if (FlushCachePolicy.TRUE.equals(options.flushCache())) {
           flushCache = true;
         } else if (FlushCachePolicy.FALSE.equals(options.flushCache())) {
           flushCache = false;
         }
+        // 是否对查询结果缓存
         useCache = options.useCache();
+        // 查询数据返回时批次返回的数据大小，避免OOM
         fetchSize = options.fetchSize() > -1 || options.fetchSize() == Integer.MIN_VALUE ? options.fetchSize() : null; //issue #348
+        // 缓存超时时间
         timeout = options.timeout() > -1 ? options.timeout() : null;
+        // 默认采用预编译
         statementType = options.statementType();
         if (options.resultSetType() != ResultSetType.DEFAULT) {
+          //TYPE_SCROLL_INSENSITIVE或TYPE_SCROLL_SENSITIVE这两个参数的共同特点是允许结果集(ResultSet)的游标可以上下移动。而默认的TYPE_FORWARD_ONLY参数只允许结果集的游标向下移动。
           resultSetType = options.resultSetType();
         }
       }
 
+      //设置返回的结果集
       String resultMapId = null;
       ResultMap resultMapAnnotation = method.getAnnotation(ResultMap.class);
-      if (resultMapAnnotation != null) {
+      if (resultMapAnnotation != null) {//设置@ResultMap 获取resultMapId  @ResultMap(value="studentMap")
         resultMapId = String.join(",", resultMapAnnotation.value());
-      } else if (isSelect) {
+      } else if (isSelect) {//没有设置@ResultMap并且是查询语句 则调用parseResultMap(method)
         resultMapId = parseResultMap(method);
       }
 
+      //构建MappedStatement
+      //MapperBuilderAssistant.addMappedStatement
+      //在这里构建MappedStatement对象，并添加到Configuration的mappedStatements中去，在后面执行sql语句时根据方法名取出来调用
       assistant.addMappedStatement(
           mappedStatementId,
           sqlSource,

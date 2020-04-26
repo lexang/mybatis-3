@@ -32,16 +32,21 @@ import org.apache.ibatis.transaction.TransactionException;
  * Ignores commit or rollback requests when autocommit is on.
  *
  * @author Clinton Begin
- *
+ *  JdbcTransaction实现类：Transaction的实现类，通过使用jdbc提供的方式来管理事务，
+ *  通过Connection提供的事务管理方法来进行事务管理
  * @see JdbcTransactionFactory
  */
 public class JdbcTransaction implements Transaction {
 
   private static final Log log = LogFactory.getLog(JdbcTransaction.class);
 
+  /* 连接**/
   protected Connection connection;
+  /* 数据源**/
   protected DataSource dataSource;
+  /* 事务等级**/
   protected TransactionIsolationLevel level;
+  /* 事务提交**/
   protected boolean autoCommit;
 
   public JdbcTransaction(DataSource ds, TransactionIsolationLevel desiredLevel, boolean desiredAutoCommit) {
@@ -95,6 +100,7 @@ public class JdbcTransaction implements Transaction {
 
   protected void setDesiredAutoCommit(boolean desiredAutoCommit) {
     try {
+      //事务提交状态不一致时修改
       if (connection.getAutoCommit() != desiredAutoCommit) {
         if (log.isDebugEnabled()) {
           log.debug("Setting autocommit to " + desiredAutoCommit + " on JDBC Connection [" + connection + "]");
@@ -131,10 +137,12 @@ public class JdbcTransaction implements Transaction {
     }
   }
 
+  //打开连接
   protected void openConnection() throws SQLException {
     if (log.isDebugEnabled()) {
       log.debug("Opening JDBC Connection");
     }
+    //从数据源中获得连接
     connection = dataSource.getConnection();
     if (level != null) {
       connection.setTransactionIsolation(level.getLevel());

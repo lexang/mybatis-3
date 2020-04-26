@@ -19,6 +19,12 @@ import java.util.Properties;
 import javax.sql.DataSource;
 
 /**
+ * 在使用 Mybatis 的时候，数据库的连接一般都会使用第三方的数据源组件，如 C3P0，DBCP 和 Druid 等，
+ * 其实 Mybatis 也有自己的数据源实现，可以连接数据库，还有连接池的功能，下面就来看看 Mybatis
+ * 自己实现的数据源和连接池
+ * 我们常见的数据源组件都实现了 Javax.sql.DataSource 接口，Mybatis 也实现该接口并且提供了两个实现类
+ * UnpooledDataSource 和 PooledDataSource 一个使用连接池，一个不使用连接池，此外，对于这两个类，
+ * Mybatis 还提供了两个工厂类进行创建对象，是工厂方法模式的一个应用
  * @author Clinton Begin
  */
 public interface DataSourceFactory {

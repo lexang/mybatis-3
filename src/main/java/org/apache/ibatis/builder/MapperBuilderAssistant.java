@@ -51,6 +51,7 @@ import org.apache.ibatis.type.TypeHandler;
 
 /**
  * @author Clinton Begin
+ * 用于缓存、sql参数、查询返回的结果集处理。
  */
 public class MapperBuilderAssistant extends BaseBuilder {
 
@@ -241,6 +242,7 @@ public class MapperBuilderAssistant extends BaseBuilder {
     return new Discriminator.Builder(configuration, resultMapping, namespaceDiscriminatorMap).build();
   }
 
+  //解析MappedStatement并将其关联到Configuration类对象
   public MappedStatement addMappedStatement(
       String id,
       SqlSource sqlSource,
@@ -263,6 +265,7 @@ public class MapperBuilderAssistant extends BaseBuilder {
       LanguageDriver lang,
       String resultSets) {
 
+    // 找不到该命名空间的二级缓存，默认不设置二级缓存时为false
     if (unresolvedCacheRef) {
       throw new IncompleteElementException("Cache-ref not yet resolved");
     }
@@ -292,8 +295,9 @@ public class MapperBuilderAssistant extends BaseBuilder {
     if (statementParameterMap != null) {
       statementBuilder.parameterMap(statementParameterMap);
     }
-
+  // 构建MappedStatement
     MappedStatement statement = statementBuilder.build();
+    // 添加在Configuration，在后面执行sql时会取出来用
     configuration.addMappedStatement(statement);
     return statement;
   }
