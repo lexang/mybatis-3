@@ -28,6 +28,8 @@ import org.apache.ibatis.session.Configuration;
 
 /**
  * @author Clinton Begin
+ * DynamicContext对象，可以将它理解为Sql片段的一个容器，用于之后拼接出Sql。同时它还有一个bindings属性，
+ * 可以用来保存运行信息，比如绑定的参数，数据库ID等
  */
 public class DynamicContext {
 
@@ -37,8 +39,9 @@ public class DynamicContext {
   static {
     OgnlRuntime.setPropertyAccessor(ContextMap.class, new ContextAccessor());
   }
-
+  //用来保存运行时上下文参数
   private final ContextMap bindings;
+  //用来拼接SQL片段
   private final StringJoiner sqlBuilder = new StringJoiner(" ");
   private int uniqueNumber = 0;
 

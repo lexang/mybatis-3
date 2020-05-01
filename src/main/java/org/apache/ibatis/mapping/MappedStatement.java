@@ -30,31 +30,46 @@ import org.apache.ibatis.session.Configuration;
 
 /**
  * @author Clinton Begin
+ * MappedStatement表示的是XML中的一个SQL。类当中的很多字段都是SQL中对应的属性
  */
 public final class MappedStatement {
-
+  //mapper配置文件名，如：UserMapper.xml
   private String resource;
   private Configuration configuration;
+  //sql的ID 节点的id属性加命名空间,如：com.lucky.mybatis.dao.UserMapper.selectByExample
   private String id;
+  //尝试影响驱动程序每次批量返回的结果行数和这个设置值相等
   private Integer fetchSize;
+  //超时时间
   private Integer timeout;
+  //Statement的类型，STATEMENT(直接操作SQL，不进行预编译)PREPARE（预处理参数，进行预编译，获取数据）CALLABLE(执行存储过程）
   private StatementType statementType;
+  //结果集类型，FORWARD_ONLY(结果集的游标只能向下滚动)/SCROLL_SENSITIVE(结果集可自由滚动，数据库变化时当前结果集同步改变)/SCROLL_INSENSITIVE(结果集的游标可以上下移动，当数据库变化时当前结果集不变)
   private ResultSetType resultSetType;
+  //表示解析出来的SQL
   private SqlSource sqlSource;
+  //缓存
   private Cache cache;
   private ParameterMap parameterMap;
+  //对应的ResultMap
   private List<ResultMap> resultMaps;
   private boolean flushCacheRequired;
+  //是否使用缓存，默认为true
   private boolean useCache;
+  //结果是否排序
   private boolean resultOrdered;
+  //SQL类型，如select、update、delete、insert
   private SqlCommandType sqlCommandType;
+  //和SELECTKEY标签有关
   private KeyGenerator keyGenerator;
   private String[] keyProperties;
   private String[] keyColumns;
   private boolean hasNestedResultMaps;
+  //数据库ID，用来区分不同环境
   private String databaseId;
   private Log statementLog;
   private LanguageDriver lang;
+  //多结果集时
   private String[] resultSets;
 
   MappedStatement() {

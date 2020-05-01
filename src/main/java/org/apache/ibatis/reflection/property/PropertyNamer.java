@@ -28,6 +28,10 @@ public final class PropertyNamer {
     // Prevent Instantiation of Static Class
   }
 
+  /**
+   * 由方法名称获取属性方法名称
+   * 属性方法名称需要以 get set is 开头
+   */
   public static String methodToProperty(String name) {
     if (name.startsWith("is")) {
       name = name.substring(2);

@@ -32,6 +32,7 @@ import org.apache.ibatis.reflection.property.PropertyTokenizer;
 public class BeanWrapper extends BaseWrapper {
 
   private final Object object;
+  //Object对应的Class
   private final MetaClass metaClass;
 
   public BeanWrapper(MetaObject metaObject, Object object) {
@@ -60,6 +61,7 @@ public class BeanWrapper extends BaseWrapper {
     }
   }
 
+  //获取属性name对应的属性名
   @Override
   public String findProperty(String name, boolean useCamelCaseMapping) {
     return metaClass.findProperty(name, useCamelCaseMapping);

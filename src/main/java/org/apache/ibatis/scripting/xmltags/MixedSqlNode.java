@@ -19,6 +19,12 @@ import java.util.List;
 
 /**
  * @author Clinton Begin
+ * MixedSqlNode是SqlNode的一个实现，包含了各个子节点，用来遍历输出子节点。SqlNode还有很多不同的实现，分别对应不同的节点类型。对应关系如下：
+ * SqlNode实现->对应SQL语句中的类型
+ * TextSqlNode->${}     IfSqlNode?->If节点     TrimSqlNode/WhereSqlNode/SetSqlNode->Trim/Where/Set节点
+ * ForEachSqlNode->foreach标签    ChooseSqlNode->choose/when/otherwhise节点  ValDeclSqlNode->bind节点
+ * StaticTextSqlNode->不含上述节点的  静态节点
+ * 除了StaticTextSqlNode节点外，其余对应的都是动态语句。
  */
 public class MixedSqlNode implements SqlNode {
   private final List<SqlNode> contents;

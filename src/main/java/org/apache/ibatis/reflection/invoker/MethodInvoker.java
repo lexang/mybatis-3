@@ -28,12 +28,21 @@ public class MethodInvoker implements Invoker {
   private final Class<?> type;
   private final Method method;
 
+
+  /**
+   * 适配器模式
+   * 对象适配器模式,在Invoker实现类中关联 Method 对象
+   * @param method
+   */
   public MethodInvoker(Method method) {
     this.method = method;
 
+
     if (method.getParameterTypes().length == 1) {
+      // 可写方法,setXXX() 参数只有一个
       type = method.getParameterTypes()[0];
     } else {
+      // 可读方法,getXXX() / isXXX() 方法无参数
       type = method.getReturnType();
     }
   }

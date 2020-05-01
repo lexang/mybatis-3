@@ -32,8 +32,11 @@ import org.apache.ibatis.reflection.wrapper.ObjectWrapperFactory;
  */
 public class MetaObject {
 
+  //原始Obeject 最主要的有三种类型 Map类型 Collection类型 普通的java对象，有get和set方法的对象
   private final Object originalObject;
+  //包装后的Object
   private final ObjectWrapper objectWrapper;
+
   private final ObjectFactory objectFactory;
   private final ObjectWrapperFactory objectWrapperFactory;
   private final ReflectorFactory reflectorFactory;
@@ -46,17 +49,18 @@ public class MetaObject {
 
     if (object instanceof ObjectWrapper) {
       this.objectWrapper = (ObjectWrapper) object;
-    } else if (objectWrapperFactory.hasWrapperFor(object)) {
+    } else if (objectWrapperFactory.hasWrapperFor(object)) { //如果对应objectWrapperFactory中存在，则返回object
       this.objectWrapper = objectWrapperFactory.getWrapperFor(this, object);
-    } else if (object instanceof Map) {
+    } else if (object instanceof Map) {//Map
       this.objectWrapper = new MapWrapper(this, (Map) object);
-    } else if (object instanceof Collection) {
+    } else if (object instanceof Collection) { //List
       this.objectWrapper = new CollectionWrapper(this, (Collection) object);
-    } else {
+    } else {//bean
       this.objectWrapper = new BeanWrapper(this, object);
     }
   }
 
+  //构造MetaObject
   public static MetaObject forObject(Object object, ObjectFactory objectFactory, ObjectWrapperFactory objectWrapperFactory, ReflectorFactory reflectorFactory) {
     if (object == null) {
       return SystemMetaObject.NULL_META_OBJECT;
@@ -85,10 +89,12 @@ public class MetaObject {
     return objectWrapper.findProperty(propName, useCamelCaseMapping);
   }
 
+  //获取可读属性名
   public String[] getGetterNames() {
     return objectWrapper.getGetterNames();
   }
 
+  //获取可写属性名
   public String[] getSetterNames() {
     return objectWrapper.getSetterNames();
   }
@@ -109,6 +115,8 @@ public class MetaObject {
     return objectWrapper.hasGetter(name);
   }
 
+  //获取对象属性name对应的值 从originalObject获取属性值
+  //getValue和setValue中的name参数支持复杂的属性访问：例如user.cust.custId,user.acts[0].acctId！
   public Object getValue(String name) {
     PropertyTokenizer prop = new PropertyTokenizer(name);
     if (prop.hasNext()) {
@@ -116,13 +124,18 @@ public class MetaObject {
       if (metaValue == SystemMetaObject.NULL_META_OBJECT) {
         return null;
       } else {
+        //这里相当于递归调用，直到最后一层。例如user.cust.custId
+        //第一次递归cust.custId
+        //第二次递归custId，这个就是真正访问要返回的
         return metaValue.getValue(prop.getChildren());
       }
     } else {
+      //getValue,setValue,add,addAll方法都是委托objectWrapper对象实现的。
       return objectWrapper.get(prop);
     }
   }
 
+  //给对象属性name设置value值
   public void setValue(String name, Object value) {
     PropertyTokenizer prop = new PropertyTokenizer(name);
     if (prop.hasNext()) {

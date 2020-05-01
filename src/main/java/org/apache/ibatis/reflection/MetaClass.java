@@ -36,6 +36,7 @@ public class MetaClass {
 
   private MetaClass(Class<?> type, ReflectorFactory reflectorFactory) {
     this.reflectorFactory = reflectorFactory;
+    //获取type类型对应的Reflector
     this.reflector = reflectorFactory.findForClass(type);
   }
 
@@ -53,6 +54,7 @@ public class MetaClass {
     return prop.length() > 0 ? prop.toString() : null;
   }
 
+  //获取name对应的属性名，useCamelCaseMapping是否是驼峰命名
   public String findProperty(String name, boolean useCamelCaseMapping) {
     if (useCamelCaseMapping) {
       name = name.replace("_", "");

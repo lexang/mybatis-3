@@ -19,11 +19,15 @@ import java.io.InputStream;
 import java.util.regex.Pattern;
 
 import org.apache.ibatis.builder.xml.XMLMapperBuilder;
+import org.apache.ibatis.domain.blog.mappers.AuthorMapper;
 import org.apache.ibatis.io.Resources;
 import org.apache.ibatis.mapping.MappedStatement;
 import org.apache.ibatis.mapping.ResultSetType;
 import org.apache.ibatis.mapping.StatementType;
 import org.apache.ibatis.session.Configuration;
+import org.apache.ibatis.session.SqlSession;
+import org.apache.ibatis.session.SqlSessionFactory;
+import org.apache.ibatis.session.SqlSessionFactoryBuilder;
 import org.apache.ibatis.type.TypeHandler;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
@@ -34,6 +38,20 @@ import static org.assertj.core.api.BDDAssertions.then;
 import static org.assertj.core.api.Assertions.assertThat;
 
 class XmlMapperBuilderTest {
+
+  @Test
+  void shouldSuccess() throws Exception {
+    //阶段一：启动时
+    String resource = "org/apache/ibatis/builder/MapperConfig.xml";
+    InputStream inputStream = Resources.getResourceAsStream(resource);
+    SqlSessionFactory sqlSessionFactory = new SqlSessionFactoryBuilder().build(inputStream);
+
+    //阶段二：执行时
+    SqlSession sqlSession = sqlSessionFactory.openSession();
+    AuthorMapper mapper = sqlSession.getMapper(AuthorMapper.class);
+    mapper.selectAuthorLinkedHashMap(1);
+  }
+
 
   @Test
   void shouldSuccessfullyLoadXMLMapperFile() throws Exception {

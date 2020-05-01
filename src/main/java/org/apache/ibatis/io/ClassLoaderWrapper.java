@@ -17,6 +17,13 @@ package org.apache.ibatis.io;
 
 import java.io.InputStream;
 import java.net.URL;
+/**
+ * jvm  启动类加载器(Bootstrap ClassLoader):这个类加载器负责将\lib目录下的类库加载到虚拟机内存中,用来加载java的核心库,
+ * 此类加载器并不继承于java.lang.ClassLoader,不能被java程序直接调用,代码是使用C++编写的.是虚拟机自身的一部分.
+ * 扩展类加载器(Extendsion ClassLoader): 这个类加载器负责加载\lib\ext目录下的类库,用来加载java的扩展库,开发者可以直接使用这个类加载器.
+ * 应用程序类加载器(Application ClassLoader):这个类加载器负责加载用户类路径(CLASSPATH)下的类库,一般我们编写的java类都是由这个类加载器加载,
+ * 这个类加载器是CLassLoader中的getSystemClassLoader()方法的返回值,所以也称为系统类加载器.一般情况下这就是系统默认的类加载器.
+ */
 
 /**
  * A class to wrap access to multiple class loaders making them work as one
@@ -25,11 +32,14 @@ import java.net.URL;
  */
 public class ClassLoaderWrapper {
 
+  // 应用指定的默认类加载器
   ClassLoader defaultClassLoader;
+  // System系统类加载器(Application ClassLoader)
   ClassLoader systemClassLoader;
 
   ClassLoaderWrapper() {
     try {
+      // 初始化SystemClassLoader
       systemClassLoader = ClassLoader.getSystemClassLoader();
     } catch (SecurityException ignored) {
       // AccessControlException on Google App Engine
@@ -43,6 +53,7 @@ public class ClassLoaderWrapper {
    * @return the resource or null
    */
   public URL getResourceAsURL(String resource) {
+    //getClassLoaders() 返回ClassLoader[] 数组，指名了类加载器的使用顺序
     return getResourceAsURL(resource, getClassLoaders(null));
   }
 
@@ -107,6 +118,7 @@ public class ClassLoaderWrapper {
    * @param resource    - the resource to get
    * @param classLoader - the classloaders to examine
    * @return the resource or null
+   *  resource(资源的地址) ,按照ClassLoader[] 加载器的顺序进行加载，返回InputStream
    */
   InputStream getResourceAsStream(String resource, ClassLoader[] classLoader) {
     for (ClassLoader cl : classLoader) {
@@ -134,6 +146,7 @@ public class ClassLoaderWrapper {
    * @param resource    - the resource to locate
    * @param classLoader - the class loaders to examine
    * @return the resource or null
+   *  从指定的资源（resource资源的URL）  按顺序（ClassLoader[]中的顺序）加载
    */
   URL getResourceAsURL(String resource, ClassLoader[] classLoader) {
 
@@ -203,10 +216,15 @@ public class ClassLoaderWrapper {
 
   ClassLoader[] getClassLoaders(ClassLoader classLoader) {
     return new ClassLoader[]{
+      //参数指定的类加载器
         classLoader,
+      // 应用指定的默认加载器
         defaultClassLoader,
+      //当前线程绑定的类加载器
         Thread.currentThread().getContextClassLoader(),
+      // 当前类使用的类加载器
         getClass().getClassLoader(),
+      // (App ClassLoader)  系统类加载器
         systemClassLoader};
   }
 
