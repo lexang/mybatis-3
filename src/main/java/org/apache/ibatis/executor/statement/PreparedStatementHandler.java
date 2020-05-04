@@ -91,7 +91,9 @@ public class PreparedStatementHandler extends BaseStatementHandler {
 
   @Override
   public void parameterize(Statement statement) throws SQLException {
+    //为参数赋值的工作是由一个叫做 parameterHandler 对象完成的，CallableStatementHandler 也是由 parameterHandler 进行参数赋值的。
     parameterHandler.setParameters((PreparedStatement) statement);
   }
+
 
 }

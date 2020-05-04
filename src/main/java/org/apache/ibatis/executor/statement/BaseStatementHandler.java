@@ -35,6 +35,12 @@ import org.apache.ibatis.type.TypeHandlerRegistry;
 
 /**
  * @author Clinton Begin
+ *
+ * BaseStatementHandler: 是 StatementHandler 接口的另一个实现类.本身是一个抽象类.用于简化StatementHandler 接口实现的难度,
+ * 属于适配器设计模式体现，它主要有三个实现类
+ * SimpleStatementHandler: 管理 Statement 对象并向数据库中推送不需要预编译的SQL语句
+ * PreparedStatementHandler: 管理 Statement 对象并向数据中推送需要预编译的SQL语句，
+ * CallableStatementHandler：管理 Statement 对象并调用数据库中的存储过程
  */
 public abstract class BaseStatementHandler implements StatementHandler {
 
@@ -85,6 +91,10 @@ public abstract class BaseStatementHandler implements StatementHandler {
     ErrorContext.instance().sql(boundSql.getSql());
     Statement statement = null;
     try {
+      /**
+       * 得到数据库连接 connection 的对象的时候，会去调用 instantiateStatement() 方法，instantiateStatement 方法位于
+       * StatementHandler 中，是一个抽象方法由子类去实现，实际执行的是三种 StatementHandler 中的一种  -->以 SimpleStatementHandler 为例
+       */
       statement = instantiateStatement(connection);
       setStatementTimeout(statement, transactionTimeout);
       setFetchSize(statement);

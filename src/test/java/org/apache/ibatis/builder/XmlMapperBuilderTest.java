@@ -16,9 +16,12 @@
 package org.apache.ibatis.builder;
 
 import java.io.InputStream;
+import java.util.LinkedHashMap;
 import java.util.regex.Pattern;
 
 import org.apache.ibatis.builder.xml.XMLMapperBuilder;
+import org.apache.ibatis.domain.blog.Author;
+import org.apache.ibatis.domain.blog.Section;
 import org.apache.ibatis.domain.blog.mappers.AuthorMapper;
 import org.apache.ibatis.io.Resources;
 import org.apache.ibatis.mapping.MappedStatement;
@@ -49,7 +52,16 @@ class XmlMapperBuilderTest {
     //阶段二：执行时
     SqlSession sqlSession = sqlSessionFactory.openSession();
     AuthorMapper mapper = sqlSession.getMapper(AuthorMapper.class);
-    mapper.selectAuthorLinkedHashMap(1);
+    LinkedHashMap<String, Object> stringObjectLinkedHashMap = mapper.selectAuthorLinkedHashMap(1);
+    Author author=new Author();
+    author.setId(1);
+    author.setEmail("qqq");
+    author.setBio("bio");
+    author.setPassword("password");
+    author.setUsername("username");
+    author.setFavouriteSection(Section.IMAGES);
+    int i = mapper.updateAuthor(author);
+    System.out.println(i);
   }
 
 

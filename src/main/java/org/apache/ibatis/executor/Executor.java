@@ -29,6 +29,13 @@ import org.apache.ibatis.transaction.Transaction;
 
 /**
  * @author Clinton Begin
+ *                                    Executor
+ *                 BaseExecutor                  CachingExecutor。
+ *
+ *SimpleExecutor ReuseExecutor BatchExecutor
+ *BaseExecutor 是一个抽象类，这种通过抽象的实现接口的方式是适配器设计模式之接口适配的体现，是Executor的默认实现，
+ * 实现了大部分Executor接口定义的功能，降低了接口实现的难度。BaseExecutor的子类有三个，分别是SimpleExecutor、ReuseExecutor和BatchExecutor。
+ * Executor执行器所起的作用相当于是管理StatementHandler 的整个生命周期的工作，包括创建、初始化、解析、关闭。
  */
 public interface Executor {
 
@@ -40,6 +47,8 @@ public interface Executor {
 
   <E> List<E> query(MappedStatement ms, Object parameter, RowBounds rowBounds, ResultHandler resultHandler) throws SQLException;
 
+  // 查询可以返回Cursor<T>类型的数据，类似于JDBC里的ResultSet类，
+  // 当查询百万级的数据的时候，使用游标可以节省内存的消耗，不需要一次性取出所有数据，可以进行逐条处理或逐条取出部分批量处理。
   <E> Cursor<E> queryCursor(MappedStatement ms, Object parameter, RowBounds rowBounds) throws SQLException;
 
   List<BatchResult> flushStatements() throws SQLException;

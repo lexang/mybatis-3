@@ -82,6 +82,10 @@ public class SimpleStatementHandler extends BaseStatementHandler {
     return resultSetHandler.handleCursorResultSets(statement);
   }
 
+  /**
+   * instantiateStatement() 最终返回的也是Statement对象，经过一系列的调用会把statement 对象返回到 SimpleExecutor 简单执行器中，
+   * 为 parametersize 方法所用。也就是说，prepare 方法负责生成 Statement 实例对象，而 parameterize 方法用于处理 Statement 实例对应的参数。
+   */
   @Override
   protected Statement instantiateStatement(Connection connection) throws SQLException {
     if (mappedStatement.getResultSetType() == ResultSetType.DEFAULT) {

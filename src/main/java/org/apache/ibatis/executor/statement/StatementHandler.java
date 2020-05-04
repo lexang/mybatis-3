@@ -34,6 +34,14 @@ import org.apache.ibatis.session.ResultHandler;
  *                         StatementHandler
  *           BaseStatementHandler     RoutingStatementHandler
  *
+ * BaseStatementHandler 有三个实现类, 他们分别是 SimpleStatementHandler、PreparedStatementHandler 和 CallableStatementHandler。
+ *
+ * RoutingStatementHandler 并没有对 Statement 对象进行使用，只是根据StatementType 来创建一个代理，代理的就是对应BaseStatementHandler 的三种实现类。
+ *
+ *  在MyBatis工作时,使用的StatementHandler 接口对象实际上就是 RoutingStatementHandler 对象.我们可以理解为
+ * StatementHandler statmentHandler = new RountingStatementHandler();
+ *
+ * StatementHandler 其实就是由 Executor 负责管理和创建的
  */
 public interface StatementHandler {
 
@@ -56,6 +64,8 @@ public interface StatementHandler {
   <E> List<E> query(Statement statement, ResultHandler resultHandler)
       throws SQLException;
 
+  // 查询可以返回Cursor<T>类型的数据，类似于JDBC里的ResultSet类，
+  // 当查询百万级的数据的时候，使用游标可以节省内存的消耗，不需要一次性取出所有数据，可以进行逐条处理或逐条取出部分批量处理。
   <E> Cursor<E> queryCursor(Statement statement)
       throws SQLException;
 

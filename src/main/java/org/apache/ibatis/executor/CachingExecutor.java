@@ -35,6 +35,8 @@ import org.apache.ibatis.transaction.Transaction;
 /**
  * @author Clinton Begin
  * @author Eduardo Macarron
+ *  缓存执行器，先从缓存中查询结果，如果存在，就返回；如果不存在，再委托给Executor delegate 去数据库中取，
+ *  delegate可以是SimpleExecutor ReuseExecutor BatchExecutor中的任何一个执行器
  */
 public class CachingExecutor implements Executor {
 
@@ -92,8 +94,10 @@ public class CachingExecutor implements Executor {
   @Override
   public <E> List<E> query(MappedStatement ms, Object parameterObject, RowBounds rowBounds, ResultHandler resultHandler, CacheKey key, BoundSql boundSql)
       throws SQLException {
+    // 得到缓存
     Cache cache = ms.getCache();
     if (cache != null) {
+      // 如果需要的话刷新缓存
       flushCacheIfRequired(ms);
       if (ms.isUseCache() && resultHandler == null) {
         ensureNoOutParams(ms, boundSql);
@@ -106,6 +110,7 @@ public class CachingExecutor implements Executor {
         return list;
       }
     }
+    // 委托模式，交给SimpleExecutor等实现类去实现方法。
     return delegate.query(ms, parameterObject, rowBounds, resultHandler, key, boundSql);
   }
 

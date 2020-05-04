@@ -31,6 +31,7 @@ import org.apache.ibatis.session.Configuration;
 /**
  * @author Clinton Begin
  * MappedStatement表示的是XML中的一个SQL。类当中的很多字段都是SQL中对应的属性
+ * 维护了一条<select|update|delete|insert>节点的封装，包括资源(resource)，配置(configuration)，SqlSource(sql源文件)等
  */
 public final class MappedStatement {
   //mapper配置文件名，如：UserMapper.xml

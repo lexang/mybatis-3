@@ -37,6 +37,7 @@ import org.apache.ibatis.transaction.Transaction;
 
 /**
  * @author Jeff Butler
+ *  批处理执行器，用于将多个SQL一次性输出到数据库
  */
 public class BatchExecutor extends BaseExecutor {
 

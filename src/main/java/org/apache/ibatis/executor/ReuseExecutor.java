@@ -35,6 +35,9 @@ import org.apache.ibatis.transaction.Transaction;
 
 /**
  * @author Clinton Begin
+ * 可重用执行器，这里的重用指的是重复使用Statement，它会在内部使用一个Map把创建的Statement都缓存起来，每次执行SQL命令的时候，
+ * 都会去判断是否存在基于该SQL的Statement对象，如果存在Statement对象并且对应的connection还没有关闭的情况下就继续使用之前的Statement对象，
+ * 并将其缓存起来。因为每一个SqlSession都有一个新的Executor对象，所以我们缓存在ReuseExecutor上的Statement作用域是同一个SqlSession。
  */
 public class ReuseExecutor extends BaseExecutor {
 

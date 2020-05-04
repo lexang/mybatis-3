@@ -588,6 +588,10 @@ public class Configuration {
     return resultSetHandler;
   }
 
+  /**
+   * StatementHandler 默认创建一个 RoutingStatementHandler ，这也就是 StatementHandler 的默认实现，由 RoutingStatementHandler
+   * 负责根据 StatementType 创建对应的StatementHandler 来处理调用。
+   */
   public StatementHandler newStatementHandler(Executor executor, MappedStatement mappedStatement, Object parameterObject, RowBounds rowBounds, ResultHandler resultHandler, BoundSql boundSql) {
     StatementHandler statementHandler = new RoutingStatementHandler(executor, mappedStatement, parameterObject, rowBounds, resultHandler, boundSql);
     statementHandler = (StatementHandler) interceptorChain.pluginAll(statementHandler);
@@ -599,9 +603,11 @@ public class Configuration {
   }
 
   public Executor newExecutor(Transaction transaction, ExecutorType executorType) {
+    // defaultExecutorType默认是简单执行器, 如果不传executorType的话，默认使用简单执行器
     executorType = executorType == null ? defaultExecutorType : executorType;
     executorType = executorType == null ? ExecutorType.SIMPLE : executorType;
     Executor executor;
+    // 根据执行器类型生成对应的执行器逻辑
     if (ExecutorType.BATCH == executorType) {
       executor = new BatchExecutor(this, transaction);
     } else if (ExecutorType.REUSE == executorType) {
@@ -609,9 +615,12 @@ public class Configuration {
     } else {
       executor = new SimpleExecutor(this, transaction);
     }
+    // 如果允许缓存，则使用缓存执行器
+    // 默认是true，如果不允许缓存的话，需要手动设置
     if (cacheEnabled) {
       executor = new CachingExecutor(executor);
     }
+    // 插件开发
     executor = (Executor) interceptorChain.pluginAll(executor);
     return executor;
   }
